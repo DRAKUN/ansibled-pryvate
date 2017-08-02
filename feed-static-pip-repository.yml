@@ -1,0 +1,98 @@
+---
+- name: download python package for server feeding
+  hosts: localhost
+  become: no
+
+  tasks:
+    - name: create temporary download directory
+      tempfile:
+        state: directory
+      register: download_dir
+
+    - name: variable cooking
+      set_fact:
+        download_dir: "{{ download_dir.path }}"
+
+    - name: download desired python packages
+      shell: >-
+        pip download --no-binary=:all: {{ pip_packages|join(' ') }}
+      args:
+        chdir: "{{ download_dir }}"
+
+
+
+- name: setup for nginx server
+  hosts: repo
+  become: yes
+  tags: setup-repository
+
+  tasks:
+    - name: install epel-release repository
+      yum:
+        name: epel-release
+        state: latest
+        update_cache: yes
+
+    - name: install nginx
+      yum:
+        name: nginx
+        state: latest
+        update_cache: yes
+
+    - name: configure nginx for static file hosting
+      template:
+        src: "templates/nginx_default_static.conf.j2"
+        dest: "/etc/nginx/default.d/statics.conf"
+        owner: "root"
+        group: "root"
+        mode: 0644
+      notify: restart nginx
+
+    - name: start & enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: ensure real path exist
+      file:
+        path: "{{ pryvate_repository_path }}"
+        state: directory
+        owner: nginx
+        group: nginx
+
+    - name: upload binaries
+      copy:
+        src: "{{ item }}"
+        dest: "{{ pryvate_repository_path }}/{{ (item|string).split('/')[-1] }}"
+        owner: nginx
+        group: nginx
+        mode: "0644"
+      with_fileglob:
+        - "{{ hostvars['localhost'].download_dir }}/*"
+
+    - include: upload_python_pkg.yml
+      with_fileglob:
+        - "{{ playbook_dir }}/bin/nginx-python/*"
+      loop_control:
+        loop_var: pypkg_path
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
+
+
+
+- name: erase download directory
+  hosts: localhost
+  become: no
+  tags: clean
+
+  tasks:
+    - name: clean download directory
+      file:
+        path: "{{ download_dir }}"
+        state: absent

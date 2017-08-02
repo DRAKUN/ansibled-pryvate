@@ -1,0 +1,7 @@
+---
+pryvate_repository_name: "pryvate"
+pryvate_repository_path: "/var/lib/nginx/{{ pryvate_repository_name }}"
+
+pip_packages:
+  - ansible
+  - pip

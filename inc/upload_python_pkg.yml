@@ -1,0 +1,25 @@
+---
+- name: extracting python package file name
+  set_fact:
+    egg: "{{ (pypkg_path|string).split('/')[-1] }}"
+
+- name: extracting subdir name for {{ egg }}
+  set_fact:
+    egg_name: >-
+      {{ egg|regex_replace('^(.*?)-([0-9]+\\.*)+.*$', '\\1')|lower|regex_replace('\\.', '-') }}
+
+- name: checking subdir {{ egg_name }} exists
+  file:
+    path: "{{ nginx_static_root }}/python/{{ egg_name }}"
+    state: directory
+    owner: nginx
+    group: nginx
+    mode: "0755"
+
+- name: uploading python package {{ egg }}
+  copy:
+    src: "{{ pypkg_path }}"
+    dest: "{{ nginx_static_root }}/python/{{ egg_name }}/{{ egg }}"
+    owner: nginx
+    group: nginx
+    mode: "0644"
