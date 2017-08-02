@@ -1,6 +1,15 @@
 ---
-pryvate_repository_name: "pryvate"
-pryvate_repository_path: "/var/lib/nginx/{{ pryvate_repository_name }}"
+pryvate_repository_name: >-
+  pryvate
+
+pryvate_repository_root: >-
+  /var/lib/nginx
+
+pryvate_repository_path: >-
+  {{ pryvate_repository_root }}/{{ pryvate_repository_name }}
+
+pryvate_repository_url: >-
+  http://{{ hostvars[groups['pip-host'][0]].ansible_default_ipv4.address }}/{{ pryvate_repository_name }}
 
 pip_packages:
   - ansible

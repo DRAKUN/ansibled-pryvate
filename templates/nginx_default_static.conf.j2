@@ -1,4 +1,4 @@
-location /{{ pryvate_repository_name }}/ {
-  root {{ pryvate_repository_path }};
+location ~ ^/{{ pryvate_repository_name }}/?.*$ {
+  root {{ pryvate_repository_root }};
   autoindex on;
 }

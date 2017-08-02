@@ -22,7 +22,7 @@
 
 
 - name: setup for nginx server
-  hosts: repo
+  hosts: pip-host
   become: yes
   tags: setup-repository
 
@@ -42,7 +42,7 @@
     - name: configure nginx for static file hosting
       template:
         src: "templates/nginx_default_static.conf.j2"
-        dest: "/etc/nginx/default.d/statics.conf"
+        dest: "/etc/nginx/default.d/{{ pryvate_repository_name }}.conf"
         owner: "root"
         group: "root"
         mode: 0644
@@ -58,24 +58,19 @@
       file:
         path: "{{ pryvate_repository_path }}"
         state: directory
-        owner: nginx
-        group: nginx
+        owner: "nginx"
+        group: "nginx"
+        mode: 0755
 
     - name: upload binaries
       copy:
         src: "{{ item }}"
         dest: "{{ pryvate_repository_path }}/{{ (item|string).split('/')[-1] }}"
-        owner: nginx
-        group: nginx
+        owner: "nginx"
+        group: "nginx"
         mode: "0644"
       with_fileglob:
         - "{{ hostvars['localhost'].download_dir }}/*"
-
-    - include: upload_python_pkg.yml
-      with_fileglob:
-        - "{{ playbook_dir }}/bin/nginx-python/*"
-      loop_control:
-        loop_var: pypkg_path
 
   handlers:
     - name: restart nginx

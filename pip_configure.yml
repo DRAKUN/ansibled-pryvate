@@ -1,0 +1,13 @@
+---
+- name: setup for nginx server
+  hosts: pip-host
+  become: yes
+
+  tasks:
+    - name: configure nginx for static file hosting
+      template:
+        src: "templates/pip.conf.j2"
+        dest: "/etc/pip.conf"
+        owner: "root"
+        group: "root"
+        mode: 0644
