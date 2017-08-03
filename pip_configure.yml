@@ -4,10 +4,18 @@
   become: yes
 
   tasks:
-    - name: configure nginx for static file hosting
+    - name: configure pip to feed on private repository
       template:
-        src: "templates/pip.conf.j2"
+        src: "{{ playbook_dir }}/templates/pip.conf.j2"
         dest: "/etc/pip.conf"
+        owner: "root"
+        group: "root"
+        mode: 0644
+
+    - name: configure easy_install to feed on private repository
+      template:
+        src: "{{ playbook_dir }}/templates/pydistutils.cfg.j2"
+        dest: "/root/.pydistutils.cfg"
         owner: "root"
         group: "root"
         mode: 0644

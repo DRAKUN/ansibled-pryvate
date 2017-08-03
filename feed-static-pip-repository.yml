@@ -1,30 +1,37 @@
 ---
-- name: download python package for server feeding
+################################################################################
+
+- name: download python packages
   hosts: localhost
   become: no
+  tags:
+    - download
 
   tasks:
-    - name: create temporary download directory
+    - name: create download directory
       tempfile:
         state: directory
       register: download_dir
+      when: download_dir is not defined
 
-    - name: variable cooking
+    - name: cook variable
       set_fact:
         download_dir: "{{ download_dir.path }}"
+      when: download_dir.path is defined
 
-    - name: download desired python packages
+    - name: download python packages
       shell: >-
         pip download --no-binary=:all: {{ pip_packages|join(' ') }}
       args:
         chdir: "{{ download_dir }}"
 
-
+################################################################################
 
 - name: setup for nginx server
   hosts: pip-host
   become: yes
-  tags: setup-repository
+  tags:
+    - setup
 
   tasks:
     - name: install epel-release repository
@@ -62,16 +69,6 @@
         group: "nginx"
         mode: 0755
 
-    - name: upload binaries
-      copy:
-        src: "{{ item }}"
-        dest: "{{ pryvate_repository_path }}/{{ (item|string).split('/')[-1] }}"
-        owner: "nginx"
-        group: "nginx"
-        mode: "0644"
-      with_fileglob:
-        - "{{ hostvars['localhost'].download_dir }}/*"
-
   handlers:
     - name: restart nginx
       service:
@@ -79,12 +76,29 @@
         state: restarted
         enabled: yes
 
+################################################################################
 
+- name: upload python packages to private repository
+  hosts: pip-host
+  become: yes
+  tags:
+    - upload
 
-- name: erase download directory
+  tasks:
+    - name: upload binaries
+      include: "{{ playbook_dir }}/inc/upload_python_pkg.yml"
+      with_fileglob:
+        - "{{ hostvars['localhost'].download_dir }}/*"
+      loop_control:
+        loop_var: pypkg_path
+
+################################################################################
+
+- name: erase local download directory
   hosts: localhost
   become: no
-  tags: clean
+  tags:
+    - clean
 
   tasks:
     - name: clean download directory

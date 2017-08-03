@@ -1,25 +1,45 @@
 ---
-- name: extracting python package file name
-  set_fact:
-    egg: "{{ (pypkg_path|string).split('/')[-1] }}"
+- name: "assert include requirements are met"
+  assert:
+    that:
+      - pypkg_path is defined
+    msg: pypkg_path variable should be defined
 
-- name: extracting subdir name for {{ egg }}
+- name: "extract python package archive name from path"
   set_fact:
-    egg_name: >-
-      {{ egg|regex_replace('^(.*?)-([0-9]+\\.*)+.*$', '\\1')|lower|regex_replace('\\.', '-') }}
+    pypkg_archive_name: "{{ (pypkg_path|string).split('/')[-1] }}"
 
-- name: checking subdir {{ egg_name }} exists
+- name: "extract python package name from archive name"
+  set_fact:
+    pypkg_name: >-
+      {{
+        pypkg_archive_name
+        |regex_replace('^(.*?)-([0-9]+\.*)+.*$', '\g<1>')
+        |lower
+        |regex_replace('\.', '-')
+      }}
+
+- name: "{{ pypkg_name }} - check subdir exists"
   file:
-    path: "{{ nginx_static_root }}/python/{{ egg_name }}"
+    path: "{{ pryvate_repository_path }}/{{ pypkg_name }}"
     state: directory
     owner: nginx
     group: nginx
     mode: "0755"
 
-- name: uploading python package {{ egg }}
+- name: "{{ pypkg_name }} - upload python package"
   copy:
     src: "{{ pypkg_path }}"
-    dest: "{{ nginx_static_root }}/python/{{ egg_name }}/{{ egg }}"
+    dest: "{{ pryvate_repository_path }}/{{ pypkg_name }}/{{ pypkg_archive_name }}"
+    owner: nginx
+    group: nginx
+    mode: "0644"
+
+- name: "{{ pypkg_name }} - link python package {{ pypkg_name }} to fit pip needs"
+  file:
+    src: "{{ pryvate_repository_path }}/{{ pypkg_name }}/{{ pypkg_archive_name }}"
+    dest: "{{ pryvate_repository_path }}/{{ pypkg_archive_name }}"
+    state: link
     owner: nginx
     group: nginx
     mode: "0644"

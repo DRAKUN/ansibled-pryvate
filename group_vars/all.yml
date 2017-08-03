@@ -1,16 +1,27 @@
 ---
+# Will be used to create location for nginx and directories on
+# nginx host.
 pryvate_repository_name: >-
   pryvate
 
+# Path on nginx host where to put the python package directory.
 pryvate_repository_root: >-
   /var/lib/nginx
 
+# Full path on nginx host of the python package directory.
 pryvate_repository_path: >-
   {{ pryvate_repository_root }}/{{ pryvate_repository_name }}
 
-pryvate_repository_url: >-
-  http://{{ hostvars[groups['pip-host'][0]].ansible_default_ipv4.address }}/{{ pryvate_repository_name }}
+# Host name reachable by all host in need to feed on python packages.
+pryvate_repository_host: >-
+  {{ hostvars[groups['pip-host'][0]].ansible_default_ipv4.address }}
 
+# Full url of the python packages repository.
+pryvate_repository_url: >-
+  http://{{ pryvate_repository_host }}/{{ pryvate_repository_name }}
+
+# List of pip-formatted package name to download locally before uploading
+# to the private python packages repository.
 pip_packages:
   - ansible
   - pip
