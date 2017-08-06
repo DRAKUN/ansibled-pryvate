@@ -1,0 +1,7 @@
+# This group contains the target python repository we are building
+# for our private zone.
+[python-repos]
+
+
+# This group contains all hosts that will feed on our private python repository.
+[python-clients]

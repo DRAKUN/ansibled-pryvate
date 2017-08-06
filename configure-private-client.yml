@@ -1,6 +1,6 @@
 ---
 - name: setup for nginx server
-  hosts: pip-host
+  hosts: python-clients
   become: yes
 
   tasks:

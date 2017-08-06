@@ -6,10 +6,10 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.groups = {
-        "pip-host" => ["private-pip"],
-        "all_groups:children" => ["pip-host"]
+        "python-repos" => ["private-pip"],
+        "all_groups:children" => ["python-repos"]
     }
     ansible.limit = "all,localhost"
-    ansible.playbook = "feed-static-pip-repository.yml"
+    ansible.playbook = "configure-private-repo.yml"
   end
 end
