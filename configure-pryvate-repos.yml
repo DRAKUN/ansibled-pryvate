@@ -28,7 +28,7 @@
 ################################################################################
 
 - name: setup for nginx server
-  hosts: python-repos
+  hosts: pryvate-repos
   become: yes
   tags:
     - setup
@@ -79,7 +79,7 @@
 ################################################################################
 
 - name: upload python packages to private repository
-  hosts: python-repos
+  hosts: pryvate-repos
   become: yes
   tags:
     - upload

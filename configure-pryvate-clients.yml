@@ -1,6 +1,6 @@
 ---
 - name: setup for nginx server
-  hosts: python-clients
+  hosts: pryvate-clients
   become: yes
 
   tasks:
@@ -12,7 +12,7 @@
         group: "root"
         mode: 0644
 
-    - name: configure easy_install to feed on private repository
+    - name: configure easy_install to feed on private repository for root
       template:
         src: "{{ playbook_dir }}/templates/pydistutils.cfg.j2"
         dest: "/root/.pydistutils.cfg"

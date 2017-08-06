@@ -14,7 +14,7 @@ pryvate_repository_path: >-
 
 # Host name reachable by all host in need to feed on python packages.
 pryvate_repository_host: >-
-  {{ hostvars[groups['pip-host'][0]].ansible_default_ipv4.address }}
+  {{ hostvars[groups['pryvate-repos'][0]].ansible_default_ipv4.address }}
 
 # Full url of the python packages repository.
 pryvate_repository_url: >-
